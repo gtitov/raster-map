@@ -31,30 +31,59 @@
             {
                 name: "Структура землепользования 2022 г.",
                 directory: "landuse-b1",
-                tiles: ["http://localhost:5500/landuse-b1/{z}/{x}/{y}.png"],
+                group: "landuse"
             },
             {
                 name: "Структура землепользования 2023 г.",
                 directory: "landuse-b2",
-                tiles: ["http://localhost:5500/landuse-b2/{z}/{x}/{y}.png"],
+                group: "landuse"
             },
             {
                 name: "Структура землепользования 2024 г.",
                 directory: "landuse-b3",
-                tiles: ["http://localhost:5500/landuse-b3/{z}/{x}/{y}.png"],
-            }
+                group: "landuse"
+            },
+            {
+                name: "Запасы углерода 2022 г.",
+                directory: "landuse-b2",
+                group: "total"
+            },
+            {
+                name: "Запасы углерода 2023 г.",
+                directory: "landuse-b2",
+                group: "total"
+            },
+            {
+                name: "Запасы углерода 2024 г.",
+                directory: "landuse-b2",
+                group: "total"
+            },
+            {
+                name: "Депонирование углерода 2022-2023 гг.",
+                directory: "landuse-b2",
+                group: "delta"
+            },
+            {
+                name: "Депонирование углерода 2023-2024 гг.",
+                directory: "landuse-b2",
+                group: "delta"
+            },
         ]
 
         document.getElementById("map-title").innerHTML = layers[0].name
 
         const mapSelect = document.getElementById("map-select")
-        layers.slice(0, 3).forEach(layer => {
+        const createOption = (layer) => {
             const option = document.createElement("sl-menu-item")
             option.value = layer.name
             option.innerText = layer.name
             mapSelect.appendChild(option)
-        })
+        }
+        layers.filter(l => l.group === "landuse").map(l => createOption(l))
         mapSelect.appendChild(document.createElement("sl-divider"))
+        layers.filter(l => l.group === "total").map(l => createOption(l))
+        mapSelect.appendChild(document.createElement("sl-divider"))
+        layers.filter(l => l.group === "delta").map(l => createOption(l))
 
         const map = new maplibregl.Map({
             container: 'map',
