@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ярославская область | Структура землепользования и депонирование углерода</title>
+    <script src='./maplibre-gl.js'></script>
+    <link href='./maplibre-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.js"></script>
+</head>
+
+<body>
+    <h1 id="map-title"></h1>
+    <div class="dropdown-selection">
+        <sl-dropdown>
+            <sl-button slot="trigger" caret>Выберите карту</sl-button>
+            <sl-menu id="map-select">
+            </sl-menu>
+        </sl-dropdown>
+    </div>
+
+    <script>
+
+    </script>
+
+    <div id="map" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1;"></div>
+    <script>
+        const layers = [
+            {
+                name: "Структура землепользования 2022 г.",
+                directory: "landuse-b1",
+                tiles: ["http://localhost:5500/landuse-b1/{z}/{x}/{y}.png"],
+            },
+            {
+                name: "Структура землепользования 2023 г.",
+                directory: "landuse-b2",
+                tiles: ["http://localhost:5500/landuse-b2/{z}/{x}/{y}.png"],
+            },
+            {
+                name: "Структура землепользования 2024 г.",
+                directory: "landuse-b3",
+                tiles: ["http://localhost:5500/landuse-b3/{z}/{x}/{y}.png"],
+            }
+        ]
+
+        document.getElementById("map-title").innerHTML = layers[0].name
+
+        const mapSelect = document.getElementById("map-select")
+        layers.slice(0, 3).forEach(layer => {
+            const option = document.createElement("sl-menu-item")
+            option.value = layer.name
+            option.innerText = layer.name
+            mapSelect.appendChild(option)
+        })
+        mapSelect.appendChild(document.createElement("sl-divider"))
+
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: "https://raw.githubusercontent.com/gtitov/basemaps/refs/heads/master/positron-nolabels.json", // stylesheet location
+            // style: {
+            //     version: 8,
+            //     sources: {},
+            //     layers: []
+            // },
+            center: [39, 58], // starting position [lng, lat]
+            zoom: 12, // starting zoom
+            hash: true,
+            minZoom: 6,
+            maxZoom: 12,
+        });
+
+        map.on("load", () => {
+            layers.forEach(layer => {
+                map.addSource(layer.directory, {
+                    type: "raster",
+                    tiles: [`http://localhost:5500/${layer.directory}/{z}/{x}/{y}.png`],
+                    maxzoom: 10
+                })
+            })
+            map.addLayer({
+                id: `${layers[0].directory}-layer`,
+                source: layers[0].directory,
+                type: "raster",
+            })
+
+            map.addControl(new maplibregl.ScaleControl());
+
+            map.addControl(new maplibregl.NavigationControl({
+
+            }));
+
+        })
+
+
+        document.querySelector('sl-dropdown').addEventListener('sl-select', event => {
+            const selectedItemName = event.detail.item;
+            const selectedItem = layers.find(layer => layer.name === selectedItemName.value);
+            document.getElementById("map-title").innerText = selectedItem.name
+            map.getSource("raster-source", {
+                type: "raster",
+                tiles: selectedItem.tiles,
+                maxzoom: 10
+            })
+            console.log(selectedItem.value);
+        });
+
+
+    </script>
+</body>
+
+</html>
