@@ -115,7 +115,7 @@
             layers.forEach(layer => {
                 map.addSource(layer.directory, {
                     type: "raster",
-                    tiles: [`http://localhost:5500/${layer.directory}/{z}/{x}/{y}.png`],
+                    tiles: [`https://mapcarbon.netlify.app/${layer.directory}/{z}/{x}/{y}.png`],
                     maxzoom: 10
                 })
             })
@@ -123,6 +123,11 @@
                 id: `${layers[0].directory}-layer`,
                 source: layers[0].directory,
                 type: "raster",
+            })
+
+            map.addSource("borders", {
+                type: "vector",
+                tiles: []
             })
 
             map.addControl(new maplibregl.ScaleControl());
