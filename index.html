@@ -135,6 +135,10 @@
             const selectedLayerName = event.detail.item.value;
             const selectedLayer = layers.find(layer => layer.name === selectedLayerName);
 
+            if (currentLayer.name === selectedLayer.name) {
+                return
+            }
+
             document.getElementById("map-title").innerText = selectedLayer.name
             map.removeLayer(`${currentLayer.directory}-layer`)
             map.addLayer({
