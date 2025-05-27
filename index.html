@@ -70,7 +70,8 @@
             },
         ]
 
-        document.getElementById("map-title").innerHTML = layers[0].name
+        let currentLayer = layers[0]
+        document.getElementById("map-title").innerHTML = currentLayer.name
 
         const mapSelect = document.getElementById("map-select")
         const createOption = (layer) => {
@@ -97,7 +98,17 @@
             zoom: 6, // starting zoom
             hash: true,
             minZoom: 6,
-            maxZoom: 12,
+            maxZoom: 10,
+            maxBounds: [
+                [
+                    32.03736221466363,
+                    55.025545599512924
+                ],
+                [
+                    46.85791885528923,
+                    60.21038690083009
+                ]
+            ]
         });
 
         map.on("load", () => {
@@ -115,24 +126,23 @@
             })
 
             map.addControl(new maplibregl.ScaleControl());
-
-            map.addControl(new maplibregl.NavigationControl({
-
-            }));
+            map.addControl(new maplibregl.NavigationControl({}));
 
         })
 
 
         document.querySelector('sl-dropdown').addEventListener('sl-select', event => {
-            const selectedItemName = event.detail.item;
-            const selectedItem = layers.find(layer => layer.name === selectedItemName.value);
-            document.getElementById("map-title").innerText = selectedItem.name
-            map.getSource("raster-source", {
+            const selectedLayerName = event.detail.item.value;
+            const selectedLayer = layers.find(layer => layer.name === selectedLayerName);
+
+            document.getElementById("map-title").innerText = selectedLayer.name
+            map.removeLayer(`${currentLayer.directory}-layer`)
+            map.addLayer({
+                id: `${selectedLayer.directory}-layer`,
+                source: selectedLayer.directory,
                 type: "raster",
-                tiles: selectedItem.tiles,
-                maxzoom: 10
             })
-            console.log(selectedItem.value);
+            currentLayer = selectedLayer
         });
 
 
