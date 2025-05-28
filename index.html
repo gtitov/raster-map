@@ -10,16 +10,52 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.js"></script>
     <style>
+        body {
+            font-family: var(--sl-font-sans)
+        }
+
+        sl-radio-group {
+            max-width: fit-content;
+        }
+
         sl-drawer::part(overlay) {
             display: none;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0
+        }
+
+        #map-title {
+            position: relative;
+            max-width: fit-content;
+        }
+
+        @media (orientation: portrait) {
+            #map-title {
+                font-size: var(--sl-font-size-large);
+                max-width: 80vw;
+            }
+
+            #open-drawer {
+                position: fixed;
+                left: 50%;
+                bottom: 20px;
+                transform: translate(-50%, -50%);
+                margin: 0 auto;
+            }
         }
     </style>
 </head>
 
-<body style="font-family: var(--sl-font-sans);">
-    <div id="map" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0"></div>
+<body>
+    <div id="map"></div>
 
-    <h1 id="map-title" style="position: relative; max-width: fit-content;"></h1>
+    <h1 id="map-title"></h1>
     <sl-dropdown>
         <sl-button slot="trigger" caret>Выберите карту</sl-button>
         <sl-menu id="map-select">
@@ -27,14 +63,14 @@
     </sl-dropdown>
     <br>
     <br>
-    <sl-radio-group size="small" label="Границы" style="max-width: fit-content;"></sl-radio-group>
+    <sl-radio-group size="small" label="Границы"></sl-radio-group>
     <br>
     <br>
     <sl-drawer label="Легенда">
         <img src="./legends/landuse.svg">
     </sl-drawer>
 
-    <sl-button>Легенда</sl-button>
+    <sl-button id="open-drawer">Легенда</sl-button>
 
 
     <script>
