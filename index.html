@@ -13,17 +13,31 @@
 
 <body>
     <h1 id="map-title"></h1>
-    <div class="dropdown-selection">
-        <sl-dropdown>
-            <sl-button slot="trigger" caret>Выберите карту</sl-button>
-            <sl-menu id="map-select">
-            </sl-menu>
-        </sl-dropdown>
-    </div>
+    <sl-dropdown>
+        <sl-button slot="trigger" caret>Выберите карту</sl-button>
+        <sl-menu id="map-select">
+        </sl-menu>
+    </sl-dropdown>
+    <br>
+    <br>
+    <sl-radio-group size="small" label="Границы">
+    </sl-radio-group>
+
 
     <div id="map" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1;"></div>
     <script>
         const host = window.location.protocol + "//" + window.location.host
+
+        const vectorLayers = [
+            {
+                name: "Районы",
+                sourceLayer: "districts"
+            },
+            {
+                name: "Лесные хозяйства",
+                sourceLayer: "les"
+            }
+        ]
 
         const layers = [
             {
@@ -84,6 +98,16 @@
         mapSelect.appendChild(document.createElement("sl-divider"))
         layers.filter(l => l.group === "delta").map(l => createOption(l))
 
+        const boundariesSelect = document.querySelector('sl-radio-group')
+        vectorLayers.map(vl => {
+            const option = document.createElement("sl-radio-button")
+            option.value = vl.sourceLayer
+            option.innerText = vl.name
+            boundariesSelect.appendChild(option)
+        })
+        boundariesSelect.value = vectorLayers[0].sourceLayer
+
+
         const map = new maplibregl.Map({
             container: 'map',
             style: "https://raw.githubusercontent.com/gtitov/basemaps/refs/heads/master/positron-nolabels.json", // stylesheet location
@@ -124,6 +148,7 @@
                 tiles: [`${host}/borders/{z}/{x}/{y}.pbf`],
                 maxzoom: 10
             })
+
             map.addLayer({
                 id: "region-layer",
                 source: "borders",
@@ -134,6 +159,18 @@
                     "line-width": 2
                 }
             })
+
+            map.addLayer({
+                id: "districts-layer",
+                source: "borders",
+                "source-layer": "districts",
+                type: "line",
+                paint: {
+                    "line-color": "#232323",
+                    "line-width": 1
+                }
+            })
+
             map.addLayer({
                 id: "les-layer",
                 source: "borders",
@@ -142,6 +179,9 @@
                 paint: {
                     "line-color": "#232323",
                     "line-width": 1
+                },
+                layout: {
+                    visibility: "none"
                 }
             })
 
@@ -155,28 +195,35 @@
             map.addControl(new maplibregl.ScaleControl());
             map.addControl(new maplibregl.NavigationControl({}));
 
+
+            document.querySelector('sl-dropdown').addEventListener('sl-select', event => {
+                const selectedLayerName = event.detail.item.value;
+                const selectedLayer = layers.find(layer => layer.name === selectedLayerName);
+
+                if (currentLayer.name === selectedLayer.name) {
+                    return
+                }
+
+                document.getElementById("map-title").innerText = selectedLayer.name
+                map.removeLayer(`${currentLayer.directory}-layer`)
+                map.addLayer({
+                    id: `${selectedLayer.directory}-layer`,
+                    source: selectedLayer.directory,
+                    type: "raster",
+                }, "region-layer") // beforeId 
+                currentLayer = selectedLayer
+            });
+
+            document.querySelector('sl-radio-group').addEventListener('sl-change', event => {
+                const selectedVectorSourceLayer = event.target.value
+                vectorLayers.map(vl => {
+                    vl.sourceLayer === selectedVectorSourceLayer ?
+                        map.setLayoutProperty(`${vl.sourceLayer}-layer`, "visibility", "visible") :
+                        map.setLayoutProperty(`${vl.sourceLayer}-layer`, "visibility", "none")
+                })
+            })
+
         })
-
-
-        document.querySelector('sl-dropdown').addEventListener('sl-select', event => {
-            const selectedLayerName = event.detail.item.value;
-            const selectedLayer = layers.find(layer => layer.name === selectedLayerName);
-
-            if (currentLayer.name === selectedLayer.name) {
-                return
-            }
-
-            document.getElementById("map-title").innerText = selectedLayer.name
-            map.removeLayer(`${currentLayer.directory}-layer`)
-            map.addLayer({
-                id: `${selectedLayer.directory}-layer`,
-                source: selectedLayer.directory,
-                type: "raster",
-            }, "region-layer") // beforeId 
-            currentLayer = selectedLayer
-        });
-
-
     </script>
 </body>
 
