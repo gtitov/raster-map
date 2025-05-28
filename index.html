@@ -9,10 +9,17 @@
     <link href='./maplibre-gl.css' rel='stylesheet' />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.js"></script>
+    <style>
+        sl-drawer::part(overlay) {
+            display: none;
+        }
+    </style>
 </head>
 
-<body>
-    <h1 id="map-title"></h1>
+<body style="font-family: var(--sl-font-sans);">
+    <div id="map" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0"></div>
+
+    <h1 id="map-title" style="position: relative; max-width: fit-content;"></h1>
     <sl-dropdown>
         <sl-button slot="trigger" caret>Выберите карту</sl-button>
         <sl-menu id="map-select">
@@ -20,11 +27,16 @@
     </sl-dropdown>
     <br>
     <br>
-    <sl-radio-group size="small" label="Границы">
-    </sl-radio-group>
+    <sl-radio-group size="small" label="Границы" style="max-width: fit-content;"></sl-radio-group>
+    <br>
+    <br>
+    <sl-drawer label="Легенда">
+        <img src="./legends/landuse.svg">
+    </sl-drawer>
+
+    <sl-button>Легенда</sl-button>
 
 
-    <div id="map" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1;"></div>
     <script>
         const host = window.location.protocol + "//" + window.location.host
 
@@ -111,11 +123,6 @@
         const map = new maplibregl.Map({
             container: 'map',
             style: "https://raw.githubusercontent.com/gtitov/basemaps/refs/heads/master/positron-nolabels.json", // stylesheet location
-            // style: {
-            //     version: 8,
-            //     sources: {},
-            //     layers: []
-            // },
             center: [39, 58], // starting position [lng, lat]
             zoom: 6, // starting zoom
             hash: true,
@@ -210,7 +217,8 @@
                     id: `${selectedLayer.directory}-layer`,
                     source: selectedLayer.directory,
                     type: "raster",
-                }, "region-layer") // beforeId 
+                }, "region-layer") // beforeId
+                document.querySelector('sl-drawer').innerHTML = `<img src="./legends/${selectedLayer.group}.svg">`
                 currentLayer = selectedLayer
             });
 
@@ -222,8 +230,24 @@
                         map.setLayoutProperty(`${vl.sourceLayer}-layer`, "visibility", "none")
                 })
             })
-
         })
+
+
+        const drawer = document.querySelector('sl-drawer');
+        const openButton = drawer.nextElementSibling;
+
+        openButton.addEventListener('click', () => {
+            if (window.matchMedia("(orientation: portrait)").matches) {
+                console.log(window.matchMedia("(orientation: portrait)").matches)
+                drawer.style = "--size: 30%;"
+                drawer.placement = "bottom"
+                drawer.show()
+            } else {
+                drawer.style = ""
+                drawer.placement = "end"
+                drawer.show()
+            }
+        });
     </script>
 </body>
 
