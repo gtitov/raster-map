@@ -21,12 +21,10 @@
         </sl-dropdown>
     </div>
 
-    <script>
-
-    </script>
-
     <div id="map" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1;"></div>
     <script>
+        const host = window.location.protocol + "//" + window.location.host
+
         const layers = [
             {
                 name: "Структура землепользования 2022 г.",
@@ -115,20 +113,44 @@
             layers.forEach(layer => {
                 map.addSource(layer.directory, {
                     type: "raster",
-                    tiles: [`https://mapcarbon.netlify.app/${layer.directory}/{z}/{x}/{y}.png`],
+                    tiles: [`${layer.directory}/{z}/{x}/{y}.png`],
                     maxzoom: 10
                 })
             })
+
+
+            map.addSource("borders", {
+                type: "vector",
+                tiles: [`${host}/borders/{z}/{x}/{y}.pbf`],
+                maxzoom: 10
+            })
+            map.addLayer({
+                id: "region-layer",
+                source: "borders",
+                "source-layer": "region",
+                type: "line",
+                paint: {
+                    "line-color": "#232323",
+                    "line-width": 2
+                }
+            })
+            map.addLayer({
+                id: "les-layer",
+                source: "borders",
+                "source-layer": "les",
+                type: "line",
+                paint: {
+                    "line-color": "#232323",
+                    "line-width": 1
+                }
+            })
+
             map.addLayer({
                 id: `${layers[0].directory}-layer`,
                 source: layers[0].directory,
                 type: "raster",
-            })
 
-            map.addSource("borders", {
-                type: "vector",
-                tiles: []
-            })
+            }, "region-layer")
 
             map.addControl(new maplibregl.ScaleControl());
             map.addControl(new maplibregl.NavigationControl({}));
@@ -150,7 +172,7 @@
                 id: `${selectedLayer.directory}-layer`,
                 source: selectedLayer.directory,
                 type: "raster",
-            })
+            }, "region-layer") // beforeId 
             currentLayer = selectedLayer
         });
 
