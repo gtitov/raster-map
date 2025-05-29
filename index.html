@@ -22,10 +22,6 @@
             display: none;
         }
 
-        sl-drawer img {
-            max-height: 300px;
-        }
-
         #map {
             position: absolute;
             top: 0;
@@ -71,7 +67,7 @@
     <br>
     <br>
     <sl-drawer label="Легенда">
-        <img src="./legends/landuse.svg">
+        <img src="./legends/landuse-horizontal.svg">
     </sl-drawer>
 
     <sl-button id="open-drawer">Легенда</sl-button>
@@ -258,7 +254,9 @@
                     source: selectedLayer.directory,
                     type: "raster",
                 }, "region-layer") // beforeId
-                document.querySelector('sl-drawer').innerHTML = `<img src="./legends/${selectedLayer.group}.svg">`
+
+
+                document.querySelector('sl-drawer').innerHTML = `<img src="./legends/${selectedLayer.group}-horizontal.svg">`
                 currentLayer = selectedLayer
             });
 
@@ -276,17 +274,24 @@
         const drawer = document.querySelector('sl-drawer');
         const openButton = drawer.nextElementSibling;
 
-        openButton.addEventListener('click', () => {
+        const showDrawer = (d) => {
             if (window.matchMedia("(orientation: portrait)").matches) {
-                console.log(window.matchMedia("(orientation: portrait)").matches)
-                drawer.style = "--size: 30%;"
-                drawer.placement = "bottom"
-                drawer.show()
+                d.style = "--size: 30%;"
+                d.placement = "bottom"
+                d.show()
             } else {
-                drawer.style = ""
-                drawer.placement = "end"
-                drawer.show()
+                d.style = ""
+                d.placement = "end"
+                d.show()
             }
+        }
+
+        customElements.whenDefined('sl-drawer').then(() => {
+            showDrawer(drawer)
+        })
+
+        openButton.addEventListener('click', () => {
+            showDrawer(drawer)
         });
     </script>
 </body>
